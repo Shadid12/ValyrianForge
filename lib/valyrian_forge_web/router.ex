@@ -24,6 +24,8 @@ defmodule ValyrianForgeWeb.Router do
     pipe_through :api
 
     get "/tables", TableController, :index
+    post "/tables", TableController, :create
+    delete "/tables/:table_name", TableController, :delete
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
