@@ -25,7 +25,9 @@ defmodule ValyrianForgeWeb.Router do
 
     get "/tables", TableController, :index
     post "/tables", TableController, :create
+    patch "/tables/:table_name", TableController, :update
     delete "/tables/:table_name", TableController, :delete
+    get "/tables/:table_name", TableController, :show
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

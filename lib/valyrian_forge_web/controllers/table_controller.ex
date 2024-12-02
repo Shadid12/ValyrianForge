@@ -94,6 +94,77 @@ defmodule ValyrianForgeWeb.TableController do
     end
   end
 
+  def show(conn, %{"table_name" => table_name}) do
+    with :ok <- validate_table_name(table_name) do
+      query = """
+      PRAGMA table_info(#{table_name});
+      """
+
+      case LibSQLClient.query(query) do
+        {:ok, [%{"results" => %{"columns" => ["cid", "name", "type", "notnull", "dflt_value", "pk"], "rows" => rows}}]} ->
+          # Map rows into column details
+          columns = Enum.map(rows, fn [_cid, name, type, _notnull, _dflt_value, _pk] ->
+            %{name: name, type: type}
+          end)
+
+          conn
+          |> put_status(:ok)
+          |> json(%{table_name: table_name, columns: columns})
+
+        {:error, reason} ->
+          conn
+          |> put_status(:internal_server_error)
+          |> json(%{error: reason})
+
+        _ ->
+          conn
+          |> put_status(:not_found)
+          |> json(%{error: "Table '#{table_name}' not found."})
+      end
+    else
+      {:error, message} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: message})
+    end
+  end
+
+  def update(conn, %{"table_name" => table_name, "add_columns" => add_columns}) do
+    with :ok <- validate_table_name(table_name),
+         :ok <- validate_columns(add_columns) do
+      # Generate ALTER TABLE statements for adding columns
+      alter_table_statements =
+        add_columns
+        |> Enum.map(fn {col_name, col_type} ->
+          "ALTER TABLE #{table_name} ADD COLUMN #{col_name} #{col_type};"
+        end)
+
+      # Execute each ALTER TABLE statement
+      results =
+        Enum.map(alter_table_statements, fn statement ->
+          LibSQLClient.query(statement)
+        end)
+
+      # Check results for errors
+      case Enum.find(results, fn result -> match?({:error, _}, result) end) do
+        nil ->
+          conn
+          |> put_status(:ok)
+          |> json(%{message: "Table '#{table_name}' updated successfully."})
+
+        {:error, reason} ->
+          conn
+          |> put_status(:internal_server_error)
+          |> json(%{error: reason})
+      end
+    else
+      {:error, message} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: message})
+    end
+  end
+
   defp validate_table_name(name) when is_binary(name) and byte_size(name) > 0, do: :ok
   defp validate_table_name(_), do: {:error, "Invalid table name."}
 
