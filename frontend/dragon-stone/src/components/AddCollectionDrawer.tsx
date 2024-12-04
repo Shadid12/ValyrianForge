@@ -83,7 +83,12 @@ const AddCollectionDrawer: React.FC<AddCollectionDrawerProps> = ({ open, onClose
     };
 
     createCollection(payload);
-    onClose();
+
+    if(!isError){
+      onClose();
+      setCollectionName('');
+      setColumns([]);
+    }
   };
 
   const isSaveDisabled =
