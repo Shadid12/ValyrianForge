@@ -16,6 +16,8 @@ class CollectionsApi {
         },
       });
 
+      console.log('---->', response);
+
       if (!response.ok) {
         throw new Error(`Error fetching tables: ${response.statusText}`);
       }
