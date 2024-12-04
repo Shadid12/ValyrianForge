@@ -29,6 +29,14 @@ defmodule ValyrianForgeWeb.Router do
     patch "/tables/:table_name", TableController, :update
     delete "/tables/:table_name", TableController, :delete
     get "/tables/:table_name", TableController, :show
+
+
+    # Record routes
+    post "/records/:table_name", RecordController, :create
+    get "/records/:table_name", RecordController, :index
+    get "/records/:table_name/:id", RecordController, :show
+    put "/records/:table_name/:id", RecordController, :update
+    delete "/records/:table_name/:id", RecordController, :delete
   end
 
   if Application.compile_env(:valyrian_forge, :dev_routes) do

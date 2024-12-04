@@ -49,12 +49,12 @@ defmodule ValyrianForge.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
-      {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
+      # HTTP client
       {:httpoison, "~> 1.8"},
+      # JSON encoding/decoding
       {:jason, "~> 1.4"},
-      # Added CORS dependency
       {:cors_plug, "~> 3.0"}
     ]
   end

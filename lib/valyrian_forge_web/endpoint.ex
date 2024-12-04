@@ -8,6 +8,11 @@ defmodule ValyrianForgeWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  plug CORSPlug,
+    origin: ["*"], # List allowed origins
+    max_age: 86400,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "UPDATE"] # List allowed methods
+
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
