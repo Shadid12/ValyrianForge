@@ -12,7 +12,6 @@ defmodule ValyrianForgeWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug Plug.CORSPlug, origin: "*"
   end
 
   scope "/", ValyrianForgeWeb do
@@ -29,7 +28,6 @@ defmodule ValyrianForgeWeb.Router do
     patch "/tables/:table_name", TableController, :update
     delete "/tables/:table_name", TableController, :delete
     get "/tables/:table_name", TableController, :show
-
 
     # Record routes
     post "/records/:table_name", RecordController, :create

@@ -9,9 +9,11 @@ defmodule ValyrianForgeWeb.Endpoint do
   ]
 
   plug CORSPlug,
-    origin: ["*"], # List allowed origins
+    # List allowed origins
+    origin: ["*"],
     max_age: 86400,
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "UPDATE"] # List allowed methods
+    # List allowed methods
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "UPDATE"]
 
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options]],
@@ -44,9 +46,6 @@ defmodule ValyrianForgeWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-
-  plug Plug.CORSPlug,
-    origin: "*"
 
   plug Plug.Session, @session_options
   plug ValyrianForgeWeb.Router
