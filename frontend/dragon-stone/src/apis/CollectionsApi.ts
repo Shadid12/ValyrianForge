@@ -1,4 +1,4 @@
-import { CreateCollectionsPayload, GetTableByNameResponse, GetTablesResponse } from "./types";
+import { Payload, GetTableByNameResponse, GetTablesResponse } from "./types";
 
 class CollectionsApi {
   private static baseUrl: string = "http://localhost:4000/api/tables";
@@ -57,16 +57,18 @@ class CollectionsApi {
   /**
    * Create a new table with the predefined payload.
    */
-  static async createTable(): Promise<{message: string } > {
-    const payload: CreateCollectionsPayload = {
-      table_name: "Doo",
-      relationships: {},
-      columns: {
-        id: "INTEGER",
-        name: "TEXT",
-        description: "TEXT",
-      },
-    };
+  static async createTable(payload: Payload): Promise<{message: string } > {
+
+    // example payload
+    // const payload: Payload = {
+    //   table_name: "Doo",
+    //   relationships: {},
+    //   columns: {
+    //     id: "INTEGER",
+    //     name: "TEXT",
+    //     description: "TEXT",
+    //   },
+    // };
 
     try {
       const response = await fetch(CollectionsApi.baseUrl, {

@@ -42,11 +42,11 @@ function App() {
               <ListItemButton
                 component={NavLink}
                 to="/"
-                style={({ isActive }) =>
-                  isActive
-                    ? { backgroundColor: "#424242", borderRadius: "8px", width: "60px" }
-                    : { borderRadius: "8px", width: "60px" }
-                }
+                // style={({ isActive }) =>
+                //   isActive
+                //     ? { backgroundColor: "#424242", borderRadius: "8px", width: "60px" }
+                //     : { borderRadius: "8px", width: "60px" }
+                // }
                 sx={{ justifyContent: "center", padding: 1 }}
               >
                 <ListItemIcon sx={{ color: "white", minWidth: "auto" }}>
@@ -58,11 +58,11 @@ function App() {
               <ListItemButton
                 component={NavLink}
                 to="/collections"
-                style={({ isActive }) =>
-                  isActive
-                    ? { backgroundColor: "#424242", borderRadius: "8px", width: "60px" }
-                    : { borderRadius: "8px", width: "60px" }
-                }
+                // style={({ isActive }) =>
+                //   isActive
+                //     ? { backgroundColor: "#424242", borderRadius: "8px", width: "60px" }
+                //     : { borderRadius: "8px", width: "60px" }
+                // }
                 sx={{ justifyContent: "center", padding: 1 }}
               >
                 <ListItemIcon sx={{ color: "white", minWidth: "auto" }}>
@@ -74,11 +74,11 @@ function App() {
               <ListItemButton
                 component={NavLink}
                 to="/settings"
-                style={({ isActive }) =>
-                  isActive
-                    ? { backgroundColor: "#424242", borderRadius: "8px", width: "60px" }
-                    : { borderRadius: "8px", width: "60px" }
-                }
+                // style={({ isActive }) =>
+                //   isActive
+                //     ? { backgroundColor: "#424242", borderRadius: "8px", width: "60px" }
+                //     : { borderRadius: "8px", width: "60px" }
+                // }
                 sx={{ justifyContent: "center", padding: 1 }}
               >
                 <ListItemIcon sx={{ color: "white", minWidth: "auto" }}>

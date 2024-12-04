@@ -1,84 +1,115 @@
 import React, { useState } from "react";
-import {
-  Box,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  TextField,
-  Button,
-} from "@mui/material";
-import { Folder, Add } from "@mui/icons-material";
-import PeopleIcon from "@mui/icons-material/People";
+import { Add } from "@mui/icons-material";
+import { Box, Button, TextField } from "@mui/material";
 import CollectionsList from "../components/CollectionsList";
+import AddCollectionDrawer from "../components/AddCollectionDrawer";
+import { GetTableByNameResponse } from "../apis/types";
+import CollectionsApi from "../apis/CollectionsApi";
+import SelectedCollectionDetails from "../components/CollectionDetails";
 
-export default function CollectionsPage() {
-  const [systemOpen, setSystemOpen] = useState(false);
+const CollectionsPage: React.FC = () => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+  const [collectionDetails, setCollectionDetails] = useState<GetTableByNameResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample collections data
-  const collections = [
-    { id: 1, name: "users", icon: <PeopleIcon /> },
-    { id: 2, name: "messages", icon: <Folder /> },
-    { id: 3, name: "pages", icon: <Folder /> },
-    { id: 4, name: "posts", icon: <Folder /> },
-    { id: 5, name: "messagesReport", icon: <Folder /> },
-  ];
+  const handleOpenDrawer = () => {
+    setIsDrawerOpen(true);
+  };
 
-  const handleSystemToggle = () => {
-    setSystemOpen(!systemOpen);
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+  };
+
+  const handleSelectCollection = async (collectionName: string) => {
+    setSelectedCollection(collectionName);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const details = await CollectionsApi.getTableByName(collectionName);
+      setCollectionDetails(details);
+    } catch (err) {
+      setError(`Failed to fetch collection details: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Box
-      sx={{
-        width: "300px",
-        backgroundColor: "#f9fafb",
-        height: "100vh",
-        padding: "16px",
-        boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
-      }}
-    >
-      {/* Search Bar */}
-      <TextField
-        placeholder="Search collections..."
-        variant="outlined"
-        size="small"
-        fullWidth
-        sx={{ marginBottom: "16px" }}
-      />
-
-      {/* Collections List */}
-      <CollectionsList />
-      <List>
-        {collections.map((collection) => (
-          <ListItem key={collection.id} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>{collection.icon}</ListItemIcon>
-              <ListItemText primary={collection.name} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-
-      {/* New Collection Button */}
-      <Box sx={{ position: "absolute", bottom: "16px", width: "calc(100% - 32px)" }}>
-        <Button
+    <Box sx={{ display: "flex", height: "100%" }}>
+      {/* Sidebar */}
+      <Box
+        sx={{
+          width: "300px",
+          backgroundColor: "#f9fafb",
+          height: "100%",
+          padding: "16px",
+          boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
+          position: "relative",
+        }}
+      >
+        {/* Search Bar */}
+        <TextField
+          placeholder="Search collections..."
           variant="outlined"
-          startIcon={<Add />}
+          size="small"
+          fullWidth
+          sx={{ marginBottom: "16px" }}
+        />
+
+        {/* Collections List */}
+        <CollectionsList onSelectCollection={handleSelectCollection} />
+
+        {/* New Collection Button */}
+        <Box
           sx={{
-            textTransform: "none",
-            borderColor: "#d1d5db",
-            color: "#374151",
-            "&:hover": {
-              borderColor: "#9ca3af",
-              backgroundColor: "#f3f4f6",
-            },
+            position: "absolute",
+            bottom: "16px",
+            width: "calc(100% - 32px)",
           }}
         >
-          New Collection
-        </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Add />}
+            sx={{
+              textTransform: "none",
+              borderColor: "#d1d5db",
+              color: "#374151",
+              "&:hover": {
+                borderColor: "#9ca3af",
+                backgroundColor: "#f3f4f6",
+              },
+            }}
+            onClick={handleOpenDrawer}
+          >
+            New Collection
+          </Button>
+        </Box>
+
+        {/* Add Collection Drawer */}
+        <AddCollectionDrawer open={isDrawerOpen} onClose={handleCloseDrawer} />
+      </Box>
+
+      {/* Selected Collection Details */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+        }}
+      >
+        {
+          selectedCollection && <SelectedCollectionDetails
+          loading={loading}
+          error={error}
+          collectionDetails={collectionDetails}
+        />
+        }
+
       </Box>
     </Box>
   );
-}
+};
+
+export default CollectionsPage;
