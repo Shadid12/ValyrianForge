@@ -58,8 +58,10 @@ defmodule ValyrianForge.MixProject do
       {:gettext, "~> 0.20"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:httpoison, "~> 1.8"},  # HTTP client
-      {:jason, "~> 1.4"},       # JSON encoding/decoding
+      # HTTP client
+      {:httpoison, "~> 1.8"},
+      # JSON encoding/decoding
+      {:jason, "~> 1.4"},
       {:cors_plug, "~> 3.0"}
     ]
   end
