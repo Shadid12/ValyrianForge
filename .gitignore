@@ -39,3 +39,32 @@ npm-debug.log
 *.db
 *.db-*
 
+
+
+# FRONTEND 
+
+
+# Logs
+/frontend/dragon-stone/logs
+/frontend/dragon-stone/*.log
+/frontend/dragon-stone/npm-debug.log*
+/frontend/dragon-stone/yarn-debug.log*
+/frontend/dragon-stone/yarn-error.log*
+/frontend/dragon-stone/pnpm-debug.log*
+/frontend/dragon-stone/lerna-debug.log*
+
+/frontend/dragon-stone/node_modules
+/frontend/dragon-stone/dist
+/frontend/dragon-stone/dist-ssr
+/frontend/dragon-stone/*.local
+
+# Editor directories and files
+/frontend/dragon-stone/.vscode/*
+/frontend/dragon-stone/!.vscode/extensions.json
+/frontend/dragon-stone/.idea
+/frontend/dragon-stone/.DS_Store
+/frontend/dragon-stone/*.suo
+/frontend/dragon-stone/*.ntvs*
+/frontend/dragon-stone/*.njsproj
+/frontend/dragon-stone/*.sln
+/frontend/dragon-stone/*.sw?
