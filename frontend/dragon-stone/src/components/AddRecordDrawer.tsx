@@ -16,9 +16,10 @@ const AddRecordDrawer: React.FC<AddRecordDrawerProps> = ({ open, onClose, column
   const [formState, setFormState] = useState<{ [key: string]: string | boolean | File | null }>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Reset error message when the drawer is closed
+  // Reset state when the drawer is closed
   useEffect(() => {
     if (!open) {
+      setFormState({});
       setErrorMessage(null);
     }
   }, [open]);
@@ -49,7 +50,7 @@ const AddRecordDrawer: React.FC<AddRecordDrawerProps> = ({ open, onClose, column
   };
 
   const handleFormChange = (updatedState: { [key: string]: string | boolean | File | null }) => {
-    setFormState(updatedState);
+    setFormState((prevState) => ({ ...prevState, ...updatedState }));
   };
 
   return (
