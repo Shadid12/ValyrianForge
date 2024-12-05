@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import SearchFieldWithMic from "./SearchFieldWithMic";
-import { DataTables } from "./DataTables.jsx"; // Ignore Error
+import { DataTables } from "./DataTables.jsx";
 import AddRecordDrawer from "./AddRecordDrawer";
+import { GetTableByNameResponse } from "../apis/types.js";
 
 interface SelectedCollectionDetailsProps {
   loading: boolean;
   error: string | null;
-  collectionDetails: { table_name: string; columns: { name: string; type: string }[] } | null;
+  collectionDetails: GetTableByNameResponse | null;
 }
 
 const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
@@ -28,8 +29,8 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
   return (
     <Box sx={{ 
       backgroundColor: "#f9fafb",
-      height: "calc(100% - 1px)",
-      padding: "32px 32px 32px 32px",
+      height: "99.9%",
+      padding: "32px 32px",
       margin: "0px 16px",
       boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
       position: "relative",
@@ -93,7 +94,14 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         </Box>
       ) : <DataTables />}
 
-      <AddRecordDrawer open={drawerOpen} onClose={handleDrawerClose} />
+      {/* AddRecordDrawer */}
+      {collectionDetails && (
+        <AddRecordDrawer 
+          open={drawerOpen} 
+          onClose={handleDrawerClose} 
+          columns={collectionDetails.columns}
+        />
+      )}
     </Box>
   );
 };

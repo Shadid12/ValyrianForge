@@ -8,7 +8,7 @@ export interface GetTablesResponse {
 }
 
 // Type for `getTableByName` response
-interface Column {
+export interface Column {
   name: string;
   type: string;
 }

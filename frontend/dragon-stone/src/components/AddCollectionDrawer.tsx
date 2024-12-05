@@ -104,11 +104,21 @@ const AddCollectionDrawer: React.FC<AddCollectionDrawerProps> = ({ open, onClose
       onClose={onClose}
       sx={{
         "& .MuiDrawer-paper": {
-          width: "300px",
+          width: "50%",
           padding: "16px",
         },
       }}
     >
+      <Box
+        sx={{ 
+          backgroundColor: "#f9fafb",
+          height: "calc(100% - 1px)",
+          padding: "16px 16px 16px 16px",
+          margin: "0px 8px",
+          boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
+          position: "relative",
+        }}
+      >
       <Typography variant="h6" gutterBottom>
         Add New Collection
       </Typography>
@@ -201,6 +211,8 @@ const AddCollectionDrawer: React.FC<AddCollectionDrawerProps> = ({ open, onClose
           Error: {error?.message}
         </Typography>
       )}
+
+      </Box>
     </Drawer>
   );
 };

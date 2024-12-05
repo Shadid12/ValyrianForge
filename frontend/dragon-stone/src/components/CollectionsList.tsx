@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { useGetCollections } from "../hooks/useGetCollections";
 import { Folder } from "@mui/icons-material";
