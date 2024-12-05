@@ -39,6 +39,7 @@ npm-debug.log
 *.db
 *.db-*
 
+/data.sqld/dbs/
 
 
 # FRONTEND 
