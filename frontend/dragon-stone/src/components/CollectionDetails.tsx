@@ -97,6 +97,7 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
       {/* AddRecordDrawer */}
       {collectionDetails && (
         <AddRecordDrawer 
+        tableName={collectionDetails.table_name}
           open={drawerOpen} 
           onClose={handleDrawerClose} 
           columns={collectionDetails.columns}

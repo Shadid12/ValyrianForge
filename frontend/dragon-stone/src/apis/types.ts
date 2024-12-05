@@ -24,3 +24,19 @@ export type Payload = {
   relationships: Record<string, unknown>;
   columns: Record<string, string>;
 };
+
+
+// Types for record data
+export interface RecordData {
+  [key: string]: string | number | boolean; // Example dynamic input fields
+}
+
+export interface UpdateRecordData {
+  [key: string]: string | number | boolean; // Example updated fields
+}
+
+// Response type for records
+export interface RecordResponse {
+  id: string | number;
+  [key: string]: any; // Flexible for table-specific data
+}
