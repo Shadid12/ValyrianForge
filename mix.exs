@@ -62,7 +62,8 @@ defmodule ValyrianForge.MixProject do
       {:httpoison, "~> 1.8"},
       # JSON encoding/decoding
       {:jason, "~> 1.4"},
-      {:cors_plug, "~> 3.0"}
+      {:cors_plug, "~> 3.0"},
+      {:uuid, "~> 1.1"}
     ]
   end
 

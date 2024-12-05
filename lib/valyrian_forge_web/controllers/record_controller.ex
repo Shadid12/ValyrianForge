@@ -3,17 +3,23 @@ defmodule ValyrianForgeWeb.RecordController do
   alias ValyrianForge.LibSQLClient
   require Logger
 
-  # List all records
-  def index(conn, %{"table_name" => table_name}) do
-    query = "SELECT * FROM #{table_name};"
+  # List all records with pagination
+  def index(conn, %{"table_name" => table_name} = params) do
+    page = Map.get(params, "page", "1") |> String.to_integer()
+    limit = Map.get(params, "limit", "10") |> String.to_integer()
 
-    case LibSQLClient.query(query) do
+    # Calculate offset
+    offset = (page - 1) * limit
+
+    query = "SELECT * FROM #{table_name} LIMIT ? OFFSET ?;"
+
+    case LibSQLClient.query_with_params(query, [limit, offset]) do
       {:ok, [%{"results" => %{"columns" => columns, "rows" => rows}}]} ->
         records = Enum.map(rows, fn row -> Enum.zip(columns, row) |> Enum.into(%{}) end)
 
         conn
         |> put_status(:ok)
-        |> json(%{data: records})
+        |> json(%{data: records, page: page, limit: limit})
 
       {:error, reason} ->
         conn
@@ -22,11 +28,12 @@ defmodule ValyrianForgeWeb.RecordController do
     end
   end
 
+
   # Show a single record by ID
   def show(conn, %{"table_name" => table_name, "id" => id}) do
     query = "SELECT * FROM #{table_name} WHERE id = ?;"
 
-    case LibSQLClient.query(query, [id]) do
+    case LibSQLClient.query_with_params(query, [id]) do
       {:ok, [%{"results" => %{"columns" => columns, "rows" => [row]}}]} ->
         record = Enum.zip(columns, row) |> Enum.into(%{})
 
@@ -49,9 +56,15 @@ defmodule ValyrianForgeWeb.RecordController do
   # Create a new record
   def create(conn, %{"table_name" => table_name, "data" => data}) do
     try do
-      columns = Enum.map(data, fn {k, _} -> k end) |> Enum.join(", ")
-      placeholders = Enum.map(data, fn _ -> "?" end) |> Enum.join(", ")
-      values = Enum.map(data, fn {_, v} -> v end)
+      # Generate a unique ID
+      unique_id = UUID.uuid4()
+      # Add the unique ID to the data
+      data_with_id = Map.put(data, "id", unique_id)
+
+      # Prepare query parameters
+      columns = Enum.map(data_with_id, fn {k, _} -> k end) |> Enum.join(", ")
+      placeholders = Enum.map(data_with_id, fn _ -> "?" end) |> Enum.join(", ")
+      values = Enum.map(data_with_id, fn {_, v} -> v end)
 
       query = "INSERT INTO #{table_name} (#{columns}) VALUES (#{placeholders});"
 
@@ -59,7 +72,7 @@ defmodule ValyrianForgeWeb.RecordController do
         {:ok, _response} ->
           conn
           |> put_status(:created)
-          |> json(%{message: "Record created successfully."})
+          |> json(%{message: "Record created successfully.", id: unique_id})
 
         {:error, reason} ->
           Logger.error("Failed to execute query: #{query} with values: #{inspect(values)}. Reason: #{reason}")
@@ -77,6 +90,7 @@ defmodule ValyrianForgeWeb.RecordController do
   end
 
 
+
   # Update a record by ID
   def update(conn, %{"table_name" => table_name, "id" => id, "data" => data}) do
     set_clause = Enum.map(data, fn {k, _} -> "#{k} = ?" end) |> Enum.join(", ")
@@ -84,7 +98,7 @@ defmodule ValyrianForgeWeb.RecordController do
 
     query = "UPDATE #{table_name} SET #{set_clause} WHERE id = ?;"
 
-    case LibSQLClient.query(query, values) do
+    case LibSQLClient.query_with_params(query, values) do
       {:ok, _response} ->
         conn
         |> put_status(:ok)
