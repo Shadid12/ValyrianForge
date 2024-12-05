@@ -1,5 +1,8 @@
-import React from "react";
-import { Box, Typography, Button, TextField } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography, Button } from "@mui/material";
+import SearchFieldWithMic from "./SearchFieldWithMic";
+import { DataTables } from "./DataTables.jsx"; // Ignore Error
+import AddRecordDrawer from "./AddRecordDrawer";
 
 interface SelectedCollectionDetailsProps {
   loading: boolean;
@@ -12,15 +15,31 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
   error,
   collectionDetails,
 }) => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
   return (
-    <Box sx={{ padding: "16px" }}>
+    <Box sx={{ 
+      backgroundColor: "#f9fafb",
+      height: "calc(100% - 1px)",
+      padding: "32px 32px 32px 32px",
+      margin: "0px 16px",
+      boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
+      position: "relative",
+     }}>
       {/* Header */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "16px",
         }}
       >
         {/* Title Section */}
@@ -38,6 +57,9 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
 
         {/* Button Section */}
         <Button
+          style={{
+            marginBottom: "16px"
+          }}
           variant="contained"
           sx={{
             textTransform: "none",
@@ -47,22 +69,15 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
               backgroundColor: "#1f2937",
             },
           }}
-          startIcon={<span style={{ fontSize: "1.25rem" }}>+</span>}
+          startIcon={<span style={{ fontSize: "1.25rem"}}>+</span>}
+          onClick={handleDrawerOpen}
         >
           New record
         </Button>
       </Box>
 
       {/* Search Box */}
-      <TextField
-        placeholder="Use natural language to aggregate your collection"
-        variant="outlined"
-        fullWidth
-        sx={{
-          marginBottom: "16px",
-          fontSize: "1.25rem",
-        }}
-      />
+      <SearchFieldWithMic />
 
       {loading ? (
         <Box sx={{ textAlign: "center", padding: "16px" }}>
@@ -76,21 +91,9 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         <Box sx={{ textAlign: "center", padding: "16px" }}>
           <Typography>Select a collection to see its details.</Typography>
         </Box>
-      ) : (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            {collectionDetails.table_name}
-          </Typography>
-          <Typography variant="subtitle1">Columns:</Typography>
-          <ul>
-            {collectionDetails.columns.map((column) => (
-              <li key={column.name}>
-                {column.name} ({column.type})
-              </li>
-            ))}
-          </ul>
-        </Box>
-      )}
+      ) : <DataTables />}
+
+      <AddRecordDrawer open={drawerOpen} onClose={handleDrawerClose} />
     </Box>
   );
 };
