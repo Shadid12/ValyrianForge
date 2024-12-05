@@ -4,6 +4,7 @@ import SearchFieldWithMic from "./SearchFieldWithMic";
 import { DataTables } from "./DataTables.jsx";
 import AddRecordDrawer from "./AddRecordDrawer";
 import { GetTableByNameResponse } from "../apis/types.js";
+import QueryScriptEditor from "./QueryScriptEditor.js";
 
 interface SelectedCollectionDetailsProps {
   loading: boolean;
@@ -24,6 +25,11 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
 
   const handleDrawerClose = () => {
     setDrawerOpen(false);
+  };
+
+  const handleExecuteQuery = (script: string) => {
+    console.log("Executing query script:", script);
+    // Add your query execution logic here
   };
 
   return (
@@ -79,6 +85,9 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
 
       {/* Search Box */}
       <SearchFieldWithMic />
+
+
+      <QueryScriptEditor onExecute={handleExecuteQuery} />
 
       {loading ? (
         <Box sx={{ textAlign: "center", padding: "16px" }}>
