@@ -2,6 +2,7 @@ import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-mod
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { AgGridReact } from '@ag-grid-community/react';
 import { useEffect, useState } from 'react';
+import { useGetRecords } from "../hooks/useGetRecords";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -9,6 +10,10 @@ ModuleRegistry.registerModules([ClientSideRowModelModule]);
 export const DataTables = () => {
     // Row Data: The data to be displayed.
     const [rowData, setRowData] = useState([]);
+    const { data, error, isLoading } = useGetRecords('fake_monkey');
+
+    console.log('data--->', data);
+
 
     // Column Definitions: Defines & controls grid columns.
     const [colDefs] = useState([

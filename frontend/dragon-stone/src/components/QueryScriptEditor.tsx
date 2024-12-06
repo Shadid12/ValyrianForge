@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Button, TextField, Typography, IconButton } from "@mui/material";
-import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import { ExpandMore, ExpandLess, QueryBuilder } from "@mui/icons-material";
 
 interface QueryScriptEditorProps {
   onExecute: (script: string) => void;
@@ -39,9 +39,12 @@ const QueryScriptEditor: React.FC<QueryScriptEditorProps> = ({ onExecute }) => {
         }}
         onClick={toggleCollapse}
       >
-        <Typography variant="h6" sx={{ fontWeight: 500 }}>
-          Query
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <QueryBuilder sx={{ marginRight: "8px", color: "#6b7280" }} />
+          <Typography variant="h6" sx={{ fontWeight: 500 }}>
+            Query
+          </Typography>
+        </Box>
         <IconButton size="small">
           {isCollapsed ? <ExpandMore /> : <ExpandLess />}
         </IconButton>

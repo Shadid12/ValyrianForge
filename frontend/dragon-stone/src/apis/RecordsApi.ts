@@ -33,30 +33,37 @@ class RecordsApi {
     }
   }
 
-  /**
-   * Fetch all records for a specific table.
-   * @param tableName - Name of the table.
-   * @returns A promise resolving to the list of records.
-   */
-  static async getRecords(tableName: string): Promise<RecordResponse[]> {
+    /**
+     * Fetch all records for a specific table with optional pagination.
+     * @param tableName - Name of the table.
+     * @param page - The page number (default is 1).
+     * @param limit - The number of records per page (default is 10).
+     * @returns A promise resolving to the list of records.
+     */
+    static async getRecords(
+    tableName: string,
+    page: number = 1,
+    limit: number = 10
+    ): Promise<RecordResponse[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/${tableName}`, {
+        const queryParams = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+        const response = await fetch(`${this.baseUrl}/${tableName}?${queryParams}`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
+            "Content-Type": "application/json",
         },
-      });
+        });
 
-      if (!response.ok) {
+        if (!response.ok) {
         throw new Error(`Error fetching records: ${response.statusText}`);
-      }
+        }
 
-      return await response.json();
+        return await response.json();
     } catch (error) {
-      console.error("Failed to fetch records:", error);
-      throw error;
+        console.error("Failed to fetch records:", error);
+        throw error;
     }
-  }
+    }
 
   /**
    * Fetch a specific record by ID.

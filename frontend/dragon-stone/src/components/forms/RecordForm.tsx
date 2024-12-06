@@ -30,29 +30,21 @@ const mapSqliteTypeToInputType = (type: string): string => {
 const RecordForm: React.FC<RecordFormProps> = ({ columns, onChange }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files, type, checked } = e.target;
-
-    // Ensure the updated state merges with existing state
-    const updatedField = {
+    const updatedState = {
       [name]: type === "file" ? (files ? files[0] : null) : type === "checkbox" ? checked : value,
     };
-
     if (onChange) {
-      onChange((prevState) => ({
-        ...prevState,
-        ...updatedField,
-      }));
+      onChange(updatedState);
     }
   };
 
   return (
     <Box
-      sx={{
+    sx={{           
         backgroundColor: "#f9fafb",
-        height: "100%",
-        padding: "16px",
-        boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
-      }}
-    >
+          height: "100%",
+          padding: "16px",
+          boxShadow: "0px 1px 3px rgba(0,0,0,0.1)", }}> {/* Added padding */}
       <Grid container spacing={3}>
         {columns.map((column) => {
           if (column.type.toUpperCase() === "BOOLEAN") {
