@@ -1,23 +1,24 @@
-import React, { useState } from "react";
-import { Box, Button, TextField, Typography, IconButton } from "@mui/material";
+import React from "react";
+import { Box, Button, TextField, Typography, IconButton, Collapse } from "@mui/material";
 import { ExpandMore, ExpandLess, QueryBuilder } from "@mui/icons-material";
 
 interface QueryScriptEditorProps {
-  onExecute: (script: string) => void;
+  onExecute: () => void;
+  isCollapsed: boolean;
+  toggleCollapse: () => void;
+  script: string;
+  setScript: React.Dispatch<React.SetStateAction<string>>;
+  prompt: string;
 }
 
-const QueryScriptEditor: React.FC<QueryScriptEditorProps> = ({ onExecute }) => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [script, setScript] = useState("");
-
-  const handleExecute = () => {
-    onExecute(script);
-  };
-
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
+const QueryScriptEditor: React.FC<QueryScriptEditorProps> = ({
+  onExecute,
+  isCollapsed,
+  toggleCollapse,
+  script,
+  setScript,
+  prompt,
+}) => {
   return (
     <Box
       sx={{
@@ -51,8 +52,28 @@ const QueryScriptEditor: React.FC<QueryScriptEditorProps> = ({ onExecute }) => {
       </Box>
 
       {/* Collapsible Content */}
-      {!isCollapsed && (
-        <Box sx={{ padding: "16px" }}>
+      <Collapse in={!isCollapsed} timeout="auto">
+        <Box sx={{ padding: "16px", transition: "all 300ms ease-in-out" }}>
+          {/* Code Display Area */}
+          <Box
+            component="textarea"
+            readOnly
+            value={"✗ "+prompt} // Static prompt text
+            sx={{
+              width: "100%",
+              padding: "16px 0px 0px 16px",
+              backgroundColor: "#f5f7fa",
+              color: "#374151",
+              fontFamily: "monospace",
+              border: "1px solid #e5e7eb",
+              borderRadius: "4px",
+              marginBottom: "16px",
+              resize: "none", // Prevent resizing
+              overflow: "hidden",
+            }}
+          />
+
+          {/* Query Input Area */}
           <TextField
             value={script}
             onChange={(e) => setScript(e.target.value)}
@@ -66,11 +87,13 @@ const QueryScriptEditor: React.FC<QueryScriptEditorProps> = ({ onExecute }) => {
               borderRadius: "4px",
             }}
           />
+
+          {/* Execute Button */}
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               variant="contained"
               color="primary"
-              onClick={handleExecute}
+              onClick={onExecute}
               sx={{
                 textTransform: "none",
               }}
@@ -79,7 +102,7 @@ const QueryScriptEditor: React.FC<QueryScriptEditorProps> = ({ onExecute }) => {
             </Button>
           </Box>
         </Box>
-      )}
+      </Collapse>
     </Box>
   );
 };

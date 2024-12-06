@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import { Box, Typography, Button } from "@mui/material";
-import SearchFieldWithMic from "./SearchFieldWithMic";
-import { DataTables } from "./DataTables.jsx";
-import AddRecordDrawer from "./AddRecordDrawer";
-import { GetTableByNameResponse } from "../apis/types.js";
+import { Box, Typography, Button, TextField } from "@mui/material";
 import QueryScriptEditor from "./QueryScriptEditor.js";
+import AddRecordDrawer from "./AddRecordDrawer.js";
+import { DataTables } from "./DataTables.jsx";
 
 interface SelectedCollectionDetailsProps {
   loading: boolean;
   error: string | null;
-  collectionDetails: GetTableByNameResponse | null;
+  collectionDetails: { table_name: string; columns: any[] } | null;
 }
 
 const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
@@ -18,6 +16,11 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
   collectionDetails,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [prompt, setPrompt] = useState(""); // The prompt for QueryScriptEditor
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false); // To track unsaved changes
+  const [isCollapsed, setIsCollapsed] = useState(true); // State for collapsing the editor
+  const [script, setScript] = useState(""); // State for the query script
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);
@@ -27,20 +30,44 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
     setDrawerOpen(false);
   };
 
-  const handleExecuteQuery = (script: string) => {
+  const handleExecuteQuery = () => {
     console.log("Executing query script:", script);
     // Add your query execution logic here
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed); // Toggle the collapse state
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchText(value);
+    if (value !== prompt) {
+      setHasUnsavedChanges(true); // Indicate changes not yet applied
+    } else {
+      setHasUnsavedChanges(false); // Reset indicator if the text matches the prompt
+    }
+  };
+
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setPrompt(searchText); // Update the prompt in QueryScriptEditor
+      setHasUnsavedChanges(false); // Reset the unsaved changes indicator
+      setIsCollapsed(false);
+    }
+  };
+
   return (
-    <Box sx={{ 
-      backgroundColor: "#f9fafb",
-      height: "99.9%",
-      padding: "32px 32px",
-      margin: "0px 16px",
-      boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
-      position: "relative",
-     }}>
+    <Box
+      sx={{
+        backgroundColor: "#f9fafb",
+        height: "99.9%",
+        padding: "32px 32px",
+        margin: "0px 16px",
+        boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
+        position: "relative",
+      }}
+    >
       {/* Header */}
       <Box
         sx={{
@@ -65,7 +92,7 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         {/* Button Section */}
         <Button
           style={{
-            marginBottom: "16px"
+            marginBottom: "16px",
           }}
           variant="contained"
           sx={{
@@ -76,7 +103,7 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
               backgroundColor: "#1f2937",
             },
           }}
-          startIcon={<span style={{ fontSize: "1.25rem"}}>+</span>}
+          startIcon={<span style={{ fontSize: "1.25rem" }}>+</span>}
           onClick={handleDrawerOpen}
         >
           New record
@@ -84,11 +111,35 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
       </Box>
 
       {/* Search Box */}
-      <SearchFieldWithMic />
+      <TextField
+        value={searchText}
+        onChange={handleSearchChange} // Track changes to the search text
+        onKeyDown={handleSearchSubmit} // Handle Enter key to apply changes
+        placeholder="Search..."
+        fullWidth
+        variant="outlined"
+        sx={{
+          marginBottom: "16px",
+          backgroundColor: hasUnsavedChanges ? "#fef3c7" : "#fff", // Change color for unsaved changes
+          "& .MuiOutlinedInput-root": {
+            "&:hover fieldset": {
+              borderColor: hasUnsavedChanges ? "#f59e0b" : "inherit", // Highlight border if unsaved
+            },
+          },
+        }}
+      />
 
+      {/* Query Script Editor */}
+      <QueryScriptEditor
+        prompt={prompt}
+        onExecute={handleExecuteQuery}
+        isCollapsed={isCollapsed}
+        toggleCollapse={toggleCollapse}
+        script={script}
+        setScript={setScript}
+      />
 
-      <QueryScriptEditor onExecute={handleExecuteQuery} />
-
+      {/* Loading/Error/Content Section */}
       {loading ? (
         <Box sx={{ textAlign: "center", padding: "16px" }}>
           <Typography>Loading...</Typography>
@@ -105,10 +156,10 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
 
       {/* AddRecordDrawer */}
       {collectionDetails && (
-        <AddRecordDrawer 
-        tableName={collectionDetails.table_name}
-          open={drawerOpen} 
-          onClose={handleDrawerClose} 
+        <AddRecordDrawer
+          tableName={collectionDetails.table_name}
+          open={drawerOpen}
+          onClose={handleDrawerClose}
           columns={collectionDetails.columns}
         />
       )}
