@@ -35,6 +35,10 @@ defmodule ValyrianForgeWeb.Router do
     get "/records/:table_name/:id", RecordController, :show
     put "/records/:table_name/:id", RecordController, :update
     delete "/records/:table_name/:id", RecordController, :delete
+
+    # Query routes
+    post "/query", QueryController, :handle_query
+
   end
 
   if Application.compile_env(:valyrian_forge, :dev_routes) do
