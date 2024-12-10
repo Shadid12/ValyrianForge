@@ -2,6 +2,9 @@ defmodule ValyrianForgeWeb.LLMController do
   use ValyrianForgeWeb, :controller
   alias ValyrianForge.LibSQLClient
   require Logger
+  @openai_url "https://api.openai.com/v1/chat/completions"
+  @model "gpt-4o"
+  @api_key System.get_env("OPENAI_API_KEY")
 
   # Handle any SQLite query
   def handle_query(conn, %{"q" => q} = params) do
@@ -11,10 +14,20 @@ defmodule ValyrianForgeWeb.LLMController do
         # Step 2: Generate the prompt
         prompt = generate_prompt(database_map, q)
 
-        # Step 3: Return the prompt as JSON response
-        conn
-        |> put_status(:ok)
-        |> json(%{prompt: prompt})
+        # Step 3: SEND the prompt to OpenAI
+        case send_prompt(prompt) do
+          {:ok, responses} ->
+            conn
+            |> put_status(:ok)
+            |> json(%{data: responses})
+
+          {:error, reason} ->
+            # Log and return error response
+            Logger.error("Failed to generate response: #{inspect(reason)}")
+            conn
+            |> put_status(:internal_server_error)
+            |> json(%{error: reason})
+        end
 
       {:error, reason} ->
         # Log and return error response
@@ -24,6 +37,43 @@ defmodule ValyrianForgeWeb.LLMController do
         |> json(%{error: reason})
     end
   end
+
+  def send_prompt(prompt) do
+    # Prepare the request payload
+    payload = %{
+      model: @model,
+      messages: [
+        %{role: "system", content: "You are a helpful assistant."},
+        %{role: "user", content: prompt}
+      ]
+    }
+
+    # Convert payload to JSON
+    headers = [
+      {"Content-Type", "application/json"},
+      {"Authorization", "Bearer #{@api_key}"}
+    ]
+
+    options = [timeout: 30_000, recv_timeout: 30_000] # 30 seconds timeout for connection and response
+
+    case HTTPoison.post(@openai_url, Jason.encode!(payload), headers, options) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        case Jason.decode(body) do
+          {:ok, response} ->
+            {:ok, response["choices"] |> Enum.map(& &1["message"]["content"])}
+
+          {:error, reason} ->
+            {:error, "Failed to decode response: #{inspect(reason)}"}
+        end
+
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+        {:error, "OpenAI API returned an error: #{code} - #{body}"}
+
+      {:error, reason} ->
+        {:error, "Failed to call OpenAI API: #{inspect(reason)}"}
+    end
+  end
+
 
   def generate_prompt(database_map, q) do
     database_json = Jason.encode!(%{database: database_map}, pretty: true)
