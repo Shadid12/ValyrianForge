@@ -39,6 +39,9 @@ defmodule ValyrianForgeWeb.Router do
     # Query routes
     post "/query", QueryController, :handle_query
 
+    # LLM routes
+    post "/llm", LLMController, :handle_query
+
   end
 
   if Application.compile_env(:valyrian_forge, :dev_routes) do
