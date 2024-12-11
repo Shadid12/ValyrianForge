@@ -5,7 +5,9 @@ import AddRecordDrawer from "./AddRecordDrawer";
 import { DataTables } from "./DataTables";
 import SearchBox from "./SearchBox";
 import { useGetRecords } from "../hooks/useGetRecords";
+import { useQueryCollection } from "../hooks/useQueryCollection";
 import { usePrompt } from "../hooks/usePrompt";
+import { QueryResponse } from "../apis/types";
 
 interface SelectedCollectionDetailsProps {
   collectionDetails: { table_name: string; columns: any[] } | null;
@@ -17,10 +19,9 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [promptText, setPromptText] = useState("");
-
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isQuery, setIsQuery] = useState(false);
+  const [data, setData] = useState<QueryResponse>();
 
   // Fetch initial records
   const {
@@ -29,17 +30,20 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
     error: recordsError,
   } = useGetRecords(collectionDetails?.table_name || "");
 
+  // Query collection hook
+  const queryCollection = useQueryCollection(prompt);
+
   // Prompt hook to execute the query
   const {
     mutate: executePrompt,
     isPending: isPromptLoading,
     error: promptError,
   } = usePrompt({
-    onSuccess: (response) => {
+    onSuccess: (response: any) => {
       setPrompt(response); // Capture and set the returned SQL value
       console.log("Prompt executed successfully:", response);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error executing prompt:", error);
     },
   });
@@ -52,9 +56,14 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
     setDrawerOpen(false);
   };
 
-  const handleExecuteQuery = () => {
-    setIsQuery(true);
-    // executePrompt({ prompt, collectionDetails });
+  const handleExecuteQuery = async () => {
+    if (prompt) {
+      setIsQuery(true);
+      const { data: promptRecords } = await queryCollection.refetch();
+      if (promptRecords) {
+        setData(promptRecords); // Update data for DataTables
+      }
+    }
   };
 
   const toggleCollapse = () => {
@@ -72,7 +81,6 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         executePrompt({ prompt: searchText, collectionDetails });
         setPrompt(searchText);
         setIsCollapsed(false);
-        setPromptText(searchText);
       } else {
         console.error("Collection details are not available.");
       }
@@ -131,7 +139,7 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
       {promptError && <Typography color="error">Error executing prompt: {promptError.message}</Typography>}
 
       <QueryScriptEditor
-        prompt={promptText}
+        prompt={prompt}
         onExecute={handleExecuteQuery}
         isCollapsed={isCollapsed}
         toggleCollapse={toggleCollapse}
@@ -143,9 +151,9 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         collectionDetails={collectionDetails}
         isQuery={isQuery}
         prompt={prompt}
-        data={records}
-        isLoading={isRecordsLoading}
-        error={recordsError}
+        data={isQuery ? data : records}
+        isLoading={isQuery ? queryCollection.isLoading : isRecordsLoading}
+        error={isQuery ? queryCollection.error : recordsError}
       />
 
       {collectionDetails && (
