@@ -5,7 +5,7 @@ import CollectionsList from "../components/CollectionsList";
 import AddCollectionDrawer from "../components/AddCollectionDrawer";
 import { GetTableByNameResponse } from "../apis/types";
 import CollectionsApi from "../apis/CollectionsApi";
-import CollectionDetails from "../components/CollectionDetails";
+import SelectedCollectionDetails from "../components/CollectionDetails";
 
 const CollectionsPage: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
@@ -100,10 +100,7 @@ const CollectionsPage: React.FC = () => {
         }}
       >
         {
-          selectedCollection && <CollectionDetails
-          loading={loading}
-          error={error}
-          collectionDetails={collectionDetails}
+          collectionDetails && <SelectedCollectionDetails collectionDetails={collectionDetails}
         />
         }
 

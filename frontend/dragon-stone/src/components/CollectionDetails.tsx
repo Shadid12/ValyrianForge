@@ -2,31 +2,41 @@ import React, { useState } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import QueryScriptEditor from "./QueryScriptEditor";
 import AddRecordDrawer from "./AddRecordDrawer";
-import { DataTables } from "./DataTables.jsx";
+import { DataTables } from "./DataTables";
 import SearchBox from "./SearchBox";
-import usePrompt from "../hooks/usePrompt";
+import { useGetRecords } from "../hooks/useGetRecords";
+import { usePrompt } from "../hooks/usePrompt";
 
 interface SelectedCollectionDetailsProps {
-  loading: boolean;
-  error: string | null;
   collectionDetails: { table_name: string; columns: any[] } | null;
 }
 
 const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
-  loading,
-  error,
   collectionDetails,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [script, setScript] = useState(""); // Updated state for script
+  const [promptText, setPromptText] = useState("");
 
-  const { mutate: executePrompt, isPending: isPromptLoading, error: promptError } = usePrompt({
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isQuery, setIsQuery] = useState(false);
+
+  // Fetch initial records
+  const {
+    data: records,
+    isLoading: isRecordsLoading,
+    error: recordsError,
+  } = useGetRecords(collectionDetails?.table_name || "");
+
+  // Prompt hook to execute the query
+  const {
+    mutate: executePrompt,
+    isPending: isPromptLoading,
+    error: promptError,
+  } = usePrompt({
     onSuccess: (response) => {
-      setScript(response); // Capture and set the returned SQL value
+      setPrompt(response); // Capture and set the returned SQL value
       console.log("Prompt executed successfully:", response);
     },
     onError: (error) => {
@@ -43,7 +53,8 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
   };
 
   const handleExecuteQuery = () => {
-    console.log("Executing query script:", script);
+    setIsQuery(true);
+    // executePrompt({ prompt, collectionDetails });
   };
 
   const toggleCollapse = () => {
@@ -53,11 +64,6 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
-    if (value !== prompt) {
-      setHasUnsavedChanges(true);
-    } else {
-      setHasUnsavedChanges(false);
-    }
   };
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -65,8 +71,8 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
       if (collectionDetails) {
         executePrompt({ prompt: searchText, collectionDetails });
         setPrompt(searchText);
-        setHasUnsavedChanges(false);
         setIsCollapsed(false);
+        setPromptText(searchText);
       } else {
         console.error("Collection details are not available.");
       }
@@ -114,41 +120,33 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         </Button>
       </Box>
 
-      {/* Use the new SearchBox component */}
       <SearchBox
         value={searchText}
         onChange={handleSearchChange}
         onSubmit={handleSearchSubmit}
-        hasUnsavedChanges={hasUnsavedChanges}
+        hasUnsavedChanges={prompt !== searchText}
       />
 
       {isPromptLoading && <Typography>Loading prompt results...</Typography>}
-      {promptError && <Typography color="error">{promptError.message}</Typography>}
+      {promptError && <Typography color="error">Error executing prompt: {promptError.message}</Typography>}
 
       <QueryScriptEditor
-        prompt={prompt}
+        prompt={promptText}
         onExecute={handleExecuteQuery}
         isCollapsed={isCollapsed}
         toggleCollapse={toggleCollapse}
-        script={script} // Pass the script state
-        setScript={setScript}
+        script={prompt}
+        setScript={setPrompt}
       />
 
-      {loading ? (
-        <Box sx={{ textAlign: "center", padding: "16px" }}>
-          <Typography>Loading...</Typography>
-        </Box>
-      ) : error ? (
-        <Box sx={{ textAlign: "center", padding: "16px" }}>
-          <Typography color="error">{error}</Typography>
-        </Box>
-      ) : !collectionDetails ? (
-        <Box sx={{ textAlign: "center", padding: "16px" }}>
-          <Typography>Select a collection to see its details.</Typography>
-        </Box>
-      ) : (
-        <DataTables collectionDetails={collectionDetails} />
-      )}
+      <DataTables
+        collectionDetails={collectionDetails}
+        isQuery={isQuery}
+        prompt={prompt}
+        data={records}
+        isLoading={isRecordsLoading}
+        error={recordsError}
+      />
 
       {collectionDetails && (
         <AddRecordDrawer

@@ -22,7 +22,7 @@ const purifyResponse = (response: ApiResponse): PurifiedResponse => {
   return match ? match[1].trim() : "";
 };
 
-const usePrompt = ({ onSuccess, onError }: { onSuccess: (response: PurifiedResponse) => void; onError?: (error: any) => void }): UseMutationResult<PurifiedResponse, Error, UsePromptArgs> => {
+export const usePrompt = ({ onSuccess, onError }: { onSuccess: (response: PurifiedResponse) => void; onError?: (error: any) => void }): UseMutationResult<PurifiedResponse, Error, UsePromptArgs> => {
   const queryClient = useQueryClient();
 
   return useMutation<PurifiedResponse, Error, UsePromptArgs>({
@@ -42,5 +42,3 @@ const usePrompt = ({ onSuccess, onError }: { onSuccess: (response: PurifiedRespo
     onError,
   });
 };
-
-export default usePrompt;
