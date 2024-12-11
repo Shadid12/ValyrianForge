@@ -7,41 +7,50 @@ import { useGetRecords } from "../hooks/useGetRecords";
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
 // Create new GridExample component
-export const DataTables = () => {
-    // Row Data: The data to be displayed.
+export const DataTables = ({ collectionDetails }) => {
+    // State for row data
     const [rowData, setRowData] = useState([]);
-    const { data, error, isLoading } = useGetRecords('fake_monkey');
+    
+    // State for column definitions
+    const [colDefs, setColDefs] = useState([]);
 
-    console.log('data--->', data);
+    // Fetch data from useGetRecords hook
+    const { data, error, isLoading } = useGetRecords(collectionDetails?.table_name);
 
-
-    // Column Definitions: Defines & controls grid columns.
-    const [colDefs] = useState([
-        { field: 'mission' },
-        { field: 'company' },
-        { field: 'location' },
-        { field: 'date' },
-        { field: 'price' },
-        { field: 'successful' },
-        { field: 'rocket' },
-    ]);
-
-    // Fetch data & update rowData state
+    // Update column definitions dynamically based on collectionDetails
     useEffect(() => {
-        fetch('https://www.ag-grid.com/example-assets/space-mission-data.json') // Fetch data from server
-            .then((result) => result.json()) // Convert to JSON
-            .then((rowData) => setRowData(rowData)); // Update state of `rowData`
-    }, []);
+        if (collectionDetails?.columns) {
+            const dynamicColDefs = collectionDetails.columns.map((column) => ({
+                field: column.name,
+                headerName: column.name.charAt(0).toUpperCase() + column.name.slice(1), // Capitalize header names
+                sortable: true, // Enable sorting
+                filter: true,  // Enable filtering
+            }));
+            setColDefs(dynamicColDefs);
+        }
+    }, [collectionDetails]);
 
-    // Container: Defines the grid's theme & dimensions.
+    // Update row data when fetched
+    useEffect(() => {
+        if (data?.data) {
+            setRowData(data.data);
+        }
+    }, [data]);
+
+    // Container: Defines the grid's theme & dimensions
     return (
         <div
-            className={
-                "ag-theme-quartz-dark"
-            }
+            className={"ag-theme-quartz-dark"}
             style={{ width: '100%', height: '85%' }}
         >
-            <AgGridReact rowData={rowData} columnDefs={colDefs} />
+            {error && <p>Error fetching data: {error.message}</p>}
+            {isLoading && <p>Loading data...</p>}
+            <AgGridReact 
+                rowData={rowData} 
+                columnDefs={colDefs} 
+                animateRows={true} // Enables row animations
+                pagination={true} // Enable pagination
+            />
         </div>
     );
 };

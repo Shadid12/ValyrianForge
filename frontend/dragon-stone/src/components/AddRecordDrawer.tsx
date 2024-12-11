@@ -46,7 +46,7 @@ const AddRecordDrawer: React.FC<AddRecordDrawerProps> = ({ open, onClose, column
       }
     });
 
-    createRecord(formattedRecord);
+    createRecord({ id: '1', ...formattedRecord });
   };
 
   const handleFormChange = (updatedState: { [key: string]: string | boolean | File | null }) => {

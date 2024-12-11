@@ -15,7 +15,7 @@ const useCreateRecords = ({ tableName, onSuccess, onError }: UseCreateRecordsPro
       return RecordsApi.createRecord(tableName, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["records", tableName] }); // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ["records", tableName] });
       onSuccess();
     },
     onError,

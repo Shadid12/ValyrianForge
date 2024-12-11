@@ -20,7 +20,7 @@ export const useGetRecords = (
   }
 
   return useQuery<RecordResponse[], Error>({
-    queryKey: ["getRecords", tableName, page, limit], // Unique query key with pagination
+    queryKey: ["records", tableName, page, limit], // Unique query key with pagination
     queryFn: () => RecordsApi.getRecords(tableName, page, limit), // Fetch function with pagination
     staleTime: 300000, // Cache results for 5 minutes
     retry: 2, // Retry failed queries twice

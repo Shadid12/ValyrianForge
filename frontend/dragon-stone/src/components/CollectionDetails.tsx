@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, TextField } from "@mui/material";
-import QueryScriptEditor from "./QueryScriptEditor.js";
-import AddRecordDrawer from "./AddRecordDrawer.js";
+import { Box, Typography, Button } from "@mui/material";
+import QueryScriptEditor from "./QueryScriptEditor";
+import AddRecordDrawer from "./AddRecordDrawer";
 import { DataTables } from "./DataTables.jsx";
+import SearchBox from "./SearchBox";
+import usePrompt from "../hooks/usePrompt";
 
 interface SelectedCollectionDetailsProps {
   loading: boolean;
@@ -17,10 +19,20 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [prompt, setPrompt] = useState(""); // The prompt for QueryScriptEditor
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false); // To track unsaved changes
-  const [isCollapsed, setIsCollapsed] = useState(true); // State for collapsing the editor
-  const [script, setScript] = useState(""); // State for the query script
+  const [prompt, setPrompt] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [script, setScript] = useState(""); // Updated state for script
+
+  const { mutate: executePrompt, isPending: isPromptLoading, error: promptError } = usePrompt({
+    onSuccess: (response) => {
+      setScript(response); // Capture and set the returned SQL value
+      console.log("Prompt executed successfully:", response);
+    },
+    onError: (error) => {
+      console.error("Error executing prompt:", error);
+    },
+  });
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);
@@ -32,28 +44,32 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
 
   const handleExecuteQuery = () => {
     console.log("Executing query script:", script);
-    // Add your query execution logic here
   };
 
   const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed); // Toggle the collapse state
+    setIsCollapsed(!isCollapsed);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
     if (value !== prompt) {
-      setHasUnsavedChanges(true); // Indicate changes not yet applied
+      setHasUnsavedChanges(true);
     } else {
-      setHasUnsavedChanges(false); // Reset indicator if the text matches the prompt
+      setHasUnsavedChanges(false);
     }
   };
 
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      setPrompt(searchText); // Update the prompt in QueryScriptEditor
-      setHasUnsavedChanges(false); // Reset the unsaved changes indicator
-      setIsCollapsed(false);
+      if (collectionDetails) {
+        executePrompt({ prompt: searchText, collectionDetails });
+        setPrompt(searchText);
+        setHasUnsavedChanges(false);
+        setIsCollapsed(false);
+      } else {
+        console.error("Collection details are not available.");
+      }
     }
   };
 
@@ -68,15 +84,7 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         position: "relative",
       }}
     >
-      {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        {/* Title Section */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="subtitle1" sx={{ display: "flex", alignItems: "center" }}>
           <Typography
             component="span"
@@ -88,12 +96,8 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
             {collectionDetails?.table_name || "Select a collection"}
           </Typography>
         </Typography>
-
-        {/* Button Section */}
         <Button
-          style={{
-            marginBottom: "16px",
-          }}
+          style={{ marginBottom: "16px" }}
           variant="contained"
           sx={{
             textTransform: "none",
@@ -110,36 +114,26 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         </Button>
       </Box>
 
-      {/* Search Box */}
-      <TextField
+      {/* Use the new SearchBox component */}
+      <SearchBox
         value={searchText}
-        onChange={handleSearchChange} // Track changes to the search text
-        onKeyDown={handleSearchSubmit} // Handle Enter key to apply changes
-        placeholder="Search..."
-        fullWidth
-        variant="outlined"
-        sx={{
-          marginBottom: "16px",
-          backgroundColor: hasUnsavedChanges ? "#fef3c7" : "#fff", // Change color for unsaved changes
-          "& .MuiOutlinedInput-root": {
-            "&:hover fieldset": {
-              borderColor: hasUnsavedChanges ? "#f59e0b" : "inherit", // Highlight border if unsaved
-            },
-          },
-        }}
+        onChange={handleSearchChange}
+        onSubmit={handleSearchSubmit}
+        hasUnsavedChanges={hasUnsavedChanges}
       />
 
-      {/* Query Script Editor */}
+      {isPromptLoading && <Typography>Loading prompt results...</Typography>}
+      {promptError && <Typography color="error">{promptError.message}</Typography>}
+
       <QueryScriptEditor
         prompt={prompt}
         onExecute={handleExecuteQuery}
         isCollapsed={isCollapsed}
         toggleCollapse={toggleCollapse}
-        script={script}
+        script={script} // Pass the script state
         setScript={setScript}
       />
 
-      {/* Loading/Error/Content Section */}
       {loading ? (
         <Box sx={{ textAlign: "center", padding: "16px" }}>
           <Typography>Loading...</Typography>
@@ -152,9 +146,10 @@ const SelectedCollectionDetails: React.FC<SelectedCollectionDetailsProps> = ({
         <Box sx={{ textAlign: "center", padding: "16px" }}>
           <Typography>Select a collection to see its details.</Typography>
         </Box>
-      ) : <DataTables />}
+      ) : (
+        <DataTables collectionDetails={collectionDetails} />
+      )}
 
-      {/* AddRecordDrawer */}
       {collectionDetails && (
         <AddRecordDrawer
           tableName={collectionDetails.table_name}

@@ -40,3 +40,11 @@ export interface RecordResponse {
   id: string | number;
   [key: string]: any; // Flexible for table-specific data
 }
+
+export interface QueryResponse {
+  data: Array<Record<string, any>>; // Dynamic key-value pairs for each record
+};
+
+export interface PromptResponse {
+  data: string[];
+};
