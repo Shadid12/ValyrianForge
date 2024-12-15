@@ -1,12 +1,12 @@
-# Makefile to run backend and frontend services
+# Makefile to run backend, frontend, and Electron app
 
-.PHONY: all start-backend start-frontend
+.PHONY: all start-backend start-frontend start-electron stop
 
 # Default target to run everything
 default: all
 
-# Run both backend and frontend
-all: start-backend start-frontend
+# Run backend, frontend, and Electron app
+all: start-backend start-frontend start-electron
 
 # Start the backend services
 start-backend:
@@ -22,4 +22,17 @@ start-backend:
 # Start the frontend services
 start-frontend:
 	@echo "Navigating to the frontend directory..."
-	cd /frontend/dragon-stone && npm run dev
+	cd /frontend/dragon-stone && npm run dev &
+
+# Start the Electron app
+start-electron:
+	@echo "Starting the Electron app..."
+	cd /frontend/dragon-stone && cross-env NODE_ENV=development electron . &
+
+# Stop all running services
+stop:
+	@echo "Stopping all services..."
+	@pkill -f "sqld" || true
+	@pkill -f "mix phx.server" || true
+	@pkill -f "npm run dev" || true
+	@pkill -f "electron" || true
