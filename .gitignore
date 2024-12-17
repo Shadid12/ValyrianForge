@@ -69,3 +69,5 @@ npm-debug.log
 /frontend/dragon-stone/*.njsproj
 /frontend/dragon-stone/*.sln
 /frontend/dragon-stone/*.sw?
+
+uploads/*

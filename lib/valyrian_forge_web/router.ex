@@ -42,6 +42,8 @@ defmodule ValyrianForgeWeb.Router do
     # LLM routes
     post "/llm", LLMController, :handle_query
 
+    post "/upload", UploadController, :create
+
   end
 
   if Application.compile_env(:valyrian_forge, :dev_routes) do
